@@ -8,7 +8,6 @@ import com.alwold.classwatch.school.RetrievalException;
 import com.alwold.classwatch.school.SchoolPlugin;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.BlockingQueue;
 import org.apache.log4j.Logger;
 
 /**
@@ -18,12 +17,12 @@ import org.apache.log4j.Logger;
 public class WorkerThread extends Thread {
 	private static Logger logger = Logger.getLogger(WorkerThread.class);
 	
-	private BlockingQueue<Course> transactionManager;
+	private CourseQueue courseQueue;
 	private Map<Long, SchoolPlugin> plugins = new HashMap<Long, SchoolPlugin>();
 	private CourseDao courseDao;
 
-	public void setTransactionManager(BlockingQueue<Course> transactionManager) {
-		this.transactionManager = transactionManager;
+	public void setCourseQueue(CourseQueue courseQueue) {
+		this.courseQueue = courseQueue;
 	}
 
 	public void setCourseDao(CourseDao courseDao) {
@@ -33,20 +32,27 @@ public class WorkerThread extends Thread {
 	@Override
 	public void run() {
 		try {
-			Course course = transactionManager.take();
+			logger.trace("waiting for tx");
+			Course course = courseQueue.take();
 			while (course != null) {
-				SchoolPlugin plugin = getPlugin(course.getTerm().getPk().getSchool());
 				try {
-					Status status = plugin.getClassStatus(course.getTerm().getPk().getCode(), course.getCourseNumber());
-					courseDao.logStatus(course.getId(), status);
-					if (status == Status.OPEN) {
-						logger.info(course.getId()+" is open!");
-						// TODO notify watchers
+					logger.trace("checking course "+course.getId());
+					SchoolPlugin plugin = getPlugin(course.getTerm().getPk().getSchool());
+					try {
+						Status status = plugin.getClassStatus(course.getTerm().getPk().getCode(), course.getCourseNumber());
+						courseDao.logStatus(course.getId(), status);
+						if (status == Status.OPEN) {
+							logger.info(course.getId()+" is open!");
+							// TODO notify watchers
+						}
+					} catch (RetrievalException e) {
+						logger.error(e);
 					}
-				} catch (RetrievalException e) {
-					logger.error(e);
+					logger.trace("waiting for tx");
+				} catch (Throwable t) {
+					logger.error("Caught exception in worker thread", t);
 				}
-				course = transactionManager.take();
+				course = courseQueue.take();
 			}
 		} catch (InterruptedException e) {
 		}
