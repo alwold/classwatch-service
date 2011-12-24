@@ -33,6 +33,7 @@ public class ClasswatchService {
 		for (int i = 0; i < WORKER_THREAD_COUNT; i++) {
 			WorkerThread thread = new WorkerThread();
 			workerThreads.add(thread);
+			thread.setName("WorkerThread"+i);
 			thread.setCourseQueue(applicationContext.getBean(CourseQueue.class));
 			thread.setCourseDao(applicationContext.getBean(CourseDao.class));
 			logger.trace("start worker");
