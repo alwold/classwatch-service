@@ -18,6 +18,7 @@
 	
 	<bean id="scheduleClassChecks" class="com.alwold.classwatch.service.ScheduleClassChecks">
 		<property name="courseQueue" ref="courseQueue"/>
+		<property name="courseDao" ref="courseDao"/>
 	</bean>
 	
 	<task:scheduler id="scheduler"/>
