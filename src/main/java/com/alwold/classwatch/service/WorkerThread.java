@@ -40,10 +40,14 @@ public class WorkerThread extends Thread {
 					SchoolPlugin plugin = getPlugin(course.getTerm().getPk().getSchool());
 					try {
 						Status status = plugin.getClassStatus(course.getTerm().getPk().getCode(), course.getCourseNumber());
-						courseDao.logStatus(course.getId(), status);
-						if (status == Status.OPEN) {
-							logger.info(course.getId()+" is open!");
-							// TODO notify watchers
+						if (status != null) {
+							courseDao.logStatus(course.getId(), status);
+							if (status == Status.OPEN) {
+								logger.info(course.getId()+" is open!");
+								// TODO notify watchers
+							}
+						} else {
+							logger.error("Class status came back null, doesn't exist?");
 						}
 					} catch (RetrievalException e) {
 						logger.error(e);
