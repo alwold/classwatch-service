@@ -4,6 +4,8 @@ import com.alwold.classwatch.dao.CourseDao;
 import com.alwold.classwatch.model.Course;
 import com.alwold.classwatch.model.School;
 import com.alwold.classwatch.model.Status;
+import com.alwold.classwatch.model.User;
+import com.alwold.classwatch.notification.Notifier;
 import com.alwold.classwatch.school.RetrievalException;
 import com.alwold.classwatch.school.SchoolPlugin;
 import java.util.HashMap;
@@ -20,6 +22,7 @@ public class WorkerThread extends Thread {
 	private CourseQueue courseQueue;
 	private Map<Long, SchoolPlugin> plugins = new HashMap<Long, SchoolPlugin>();
 	private CourseDao courseDao;
+	private Notifier notifier;
 
 	public void setCourseQueue(CourseQueue courseQueue) {
 		this.courseQueue = courseQueue;
@@ -27,6 +30,10 @@ public class WorkerThread extends Thread {
 
 	public void setCourseDao(CourseDao courseDao) {
 		this.courseDao = courseDao;
+	}
+
+	public void setNotifier(Notifier notifier) {
+		this.notifier = notifier;
 	}
 	
 	@Override
@@ -45,6 +52,11 @@ public class WorkerThread extends Thread {
 							if (status == Status.OPEN) {
 								logger.info(course.getId()+" is open!");
 								// TODO notify watchers
+								for (User user: courseDao.getActiveWatchers(course)) {
+									logger.trace("notifying "+user.getEmail());
+									notifier.notify(user, course, plugin.getClassInfo(course.getTerm().getPk().getCode(), course.getCourseNumber()));
+									courseDao.setNotified(user, course);
+								}
 							}
 						} else {
 							logger.error("Class status came back null, doesn't exist?");

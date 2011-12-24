@@ -1,6 +1,7 @@
 package com.alwold.classwatch.service;
 
 import com.alwold.classwatch.dao.CourseDao;
+import com.alwold.classwatch.notification.Notifier;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.Logger;
@@ -36,6 +37,7 @@ public class ClasswatchService {
 			thread.setName("WorkerThread"+i);
 			thread.setCourseQueue(applicationContext.getBean(CourseQueue.class));
 			thread.setCourseDao(applicationContext.getBean(CourseDao.class));
+			thread.setNotifier(applicationContext.getBean(Notifier.class));
 			logger.trace("start worker");
 			thread.start();
 		}
