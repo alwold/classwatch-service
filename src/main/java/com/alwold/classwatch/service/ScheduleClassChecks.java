@@ -27,7 +27,7 @@ public class ScheduleClassChecks {
 	
 	public void scheduleClassChecks() throws InterruptedException {
 		logger.trace("scheduleClasschecks");
-		for (Course course: courseDao.getCourses("alwold@gmail.com")) {
+		for (Course course: courseDao.getCoursesWithWatchers()) {
 			logger.trace("put course");
 			courseQueue.put(course);
 		}
