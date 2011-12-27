@@ -1,6 +1,7 @@
 package com.alwold.classwatch.service;
 
 import com.alwold.classwatch.dao.CourseDao;
+import com.alwold.classwatch.dao.NotificationDao;
 import com.alwold.classwatch.model.Course;
 import com.alwold.classwatch.model.School;
 import com.alwold.classwatch.model.Status;
@@ -24,19 +25,8 @@ public class WorkerThread extends Thread {
 	private Map<Long, SchoolPlugin> plugins = new HashMap<Long, SchoolPlugin>();
 	private CourseDao courseDao;
 	private List<Notifier> notifiers;
+	private NotificationDao notificationDao;
 
-	public void setCourseQueue(CourseQueue courseQueue) {
-		this.courseQueue = courseQueue;
-	}
-
-	public void setCourseDao(CourseDao courseDao) {
-		this.courseDao = courseDao;
-	}
-
-	public void setNotifiers(List<Notifier> notifiers) {
-		this.notifiers = notifiers;
-	}
-	
 	@Override
 	public void run() {
 		try {
@@ -56,6 +46,7 @@ public class WorkerThread extends Thread {
 									logger.trace("notifying "+user.getEmail());
 									for (Notifier notifier: notifiers) {
 										notifier.notify(user, course, plugin.getClassInfo(course.getTerm().getPk().getCode(), course.getCourseNumber()));
+										notificationDao.logNotification(course, user, notifier.getType());
 									}
 									courseDao.setNotified(user, course);
 								}
@@ -96,4 +87,21 @@ public class WorkerThread extends Thread {
 			}
 		}
 	}
+
+	public void setCourseQueue(CourseQueue courseQueue) {
+		this.courseQueue = courseQueue;
+	}
+
+	public void setCourseDao(CourseDao courseDao) {
+		this.courseDao = courseDao;
+	}
+
+	public void setNotifiers(List<Notifier> notifiers) {
+		this.notifiers = notifiers;
+	}
+
+	public void setNotificationDao(NotificationDao notificationDao) {
+		this.notificationDao = notificationDao;
+	}
+
 }
