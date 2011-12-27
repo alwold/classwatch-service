@@ -6,6 +6,10 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
 	   http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd
 ">
+	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location" value="classpath:config.properties"/>
+	</bean>
+	
 	<bean id="dataSource"
         class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
 		<property name="driverClass" value="org.postgresql.Driver"/>
@@ -39,6 +43,11 @@
 	<bean id="emailNotifier" class="com.alwold.classwatch.notification.EmailNotifier">
 		<property name="mailSender" ref="mailSender"/>
 		<property name="templateMessage" ref="templateMessage"/>
+	</bean>
+	
+	<bean id="googleVoiceSmsNotifier" class="com.alwold.classwatch.notification.GoogleVoiceSmsNotifier">
+		<property name="username" value="${com.alwold.classwatch.notification.GoogleVoiceSmsNotifier.username}"/>
+		<property name="password" value="${com.alwold.classwatch.notification.GoogleVoiceSmsNotifier.password}"/>
 	</bean>
 
 </beans>

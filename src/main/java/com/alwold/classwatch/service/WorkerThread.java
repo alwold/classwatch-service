@@ -9,6 +9,7 @@ import com.alwold.classwatch.notification.Notifier;
 import com.alwold.classwatch.school.RetrievalException;
 import com.alwold.classwatch.school.SchoolPlugin;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.log4j.Logger;
 
@@ -22,7 +23,7 @@ public class WorkerThread extends Thread {
 	private CourseQueue courseQueue;
 	private Map<Long, SchoolPlugin> plugins = new HashMap<Long, SchoolPlugin>();
 	private CourseDao courseDao;
-	private Notifier notifier;
+	private List<Notifier> notifiers;
 
 	public void setCourseQueue(CourseQueue courseQueue) {
 		this.courseQueue = courseQueue;
@@ -32,8 +33,8 @@ public class WorkerThread extends Thread {
 		this.courseDao = courseDao;
 	}
 
-	public void setNotifier(Notifier notifier) {
-		this.notifier = notifier;
+	public void setNotifiers(List<Notifier> notifiers) {
+		this.notifiers = notifiers;
 	}
 	
 	@Override
@@ -51,10 +52,11 @@ public class WorkerThread extends Thread {
 							courseDao.logStatus(course.getId(), status);
 							if (status == Status.OPEN) {
 								logger.info(course.getId()+" is open!");
-								// TODO notify watchers
 								for (User user: courseDao.getActiveWatchers(course)) {
 									logger.trace("notifying "+user.getEmail());
-									notifier.notify(user, course, plugin.getClassInfo(course.getTerm().getPk().getCode(), course.getCourseNumber()));
+									for (Notifier notifier: notifiers) {
+										notifier.notify(user, course, plugin.getClassInfo(course.getTerm().getPk().getCode(), course.getCourseNumber()));
+									}
 									courseDao.setNotified(user, course);
 								}
 							}

@@ -37,7 +37,7 @@ public class ClasswatchService {
 			thread.setName("WorkerThread"+i);
 			thread.setCourseQueue(applicationContext.getBean(CourseQueue.class));
 			thread.setCourseDao(applicationContext.getBean(CourseDao.class));
-			thread.setNotifier(applicationContext.getBean(Notifier.class));
+			thread.setNotifiers(new ArrayList(applicationContext.getBeansOfType(Notifier.class).values()));
 			logger.trace("start worker");
 			thread.start();
 		}
