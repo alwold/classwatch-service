@@ -3,9 +3,11 @@ package com.alwold.classwatch.service;
 import com.alwold.classwatch.dao.CourseDao;
 import com.alwold.classwatch.dao.NotificationDao;
 import com.alwold.classwatch.model.Course;
+import com.alwold.classwatch.model.NotificationStatus;
 import com.alwold.classwatch.model.School;
 import com.alwold.classwatch.model.Status;
 import com.alwold.classwatch.model.User;
+import com.alwold.classwatch.notification.NotificationException;
 import com.alwold.classwatch.notification.Notifier;
 import com.alwold.classwatch.school.RetrievalException;
 import com.alwold.classwatch.school.SchoolPlugin;
@@ -45,8 +47,12 @@ public class WorkerThread extends Thread {
 								for (User user: courseDao.getActiveWatchers(course)) {
 									logger.trace("notifying "+user.getEmail());
 									for (Notifier notifier: notifiers) {
-										notifier.notify(user, course, plugin.getClassInfo(course.getTerm().getPk().getCode(), course.getCourseNumber()));
-										notificationDao.logNotification(course, user, notifier.getType());
+										try {
+											notifier.notify(user, course, plugin.getClassInfo(course.getTerm().getPk().getCode(), course.getCourseNumber()));
+											notificationDao.logNotification(course, user, notifier.getType(), NotificationStatus.SUCCESSS, null);
+										} catch (NotificationException e) {
+											notificationDao.logNotification(course, user, notifier.getType(), NotificationStatus.FAILURE, e.getMessage());
+										}
 									}
 									courseDao.setNotified(user, course);
 								}
