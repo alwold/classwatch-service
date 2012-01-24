@@ -31,23 +31,4 @@
 		<task:scheduled ref="scheduleClassChecks" method="scheduleClassChecks" fixed-rate="60000"/>
 	</task:scheduled-tasks>
 	
-	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
-		<property name="host" value="smtp.cox.net"/>
-	</bean>
-	
-	<bean id="templateMessage" class="org.springframework.mail.SimpleMailMessage">
-		<property name="from" value="alwold@alwold.com"/>
-		<property name="subject" value="Your class"/>
-	</bean>
-
-	<bean id="emailNotifier" class="com.alwold.classwatch.notification.EmailNotifier">
-		<property name="mailSender" ref="mailSender"/>
-		<property name="templateMessage" ref="templateMessage"/>
-	</bean>
-	
-	<bean id="googleVoiceSmsNotifier" class="com.alwold.classwatch.notification.GoogleVoiceSmsNotifier">
-		<property name="username" value="${com.alwold.classwatch.notification.GoogleVoiceSmsNotifier.username}"/>
-		<property name="password" value="${com.alwold.classwatch.notification.GoogleVoiceSmsNotifier.password}"/>
-	</bean>
-
 </beans>
