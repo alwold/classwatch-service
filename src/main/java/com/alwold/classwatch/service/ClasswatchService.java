@@ -2,6 +2,7 @@ package com.alwold.classwatch.service;
 
 import com.alwold.classwatch.dao.CourseDao;
 import com.alwold.classwatch.dao.NotificationDao;
+import com.alwold.classwatch.dao.UserDao;
 import com.alwold.classwatch.notification.Notifier;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +41,7 @@ public class ClasswatchService {
 			thread.setCourseDao(applicationContext.getBean(CourseDao.class));
 			thread.setNotifiers(new ArrayList(applicationContext.getBeansOfType(Notifier.class).values()));
 			thread.setNotificationDao(applicationContext.getBean(NotificationDao.class));
+			thread.setUserDao(applicationContext.getBean(UserDao.class));
 			logger.trace("start worker");
 			thread.start();
 		}

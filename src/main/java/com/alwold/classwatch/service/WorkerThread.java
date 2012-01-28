@@ -2,6 +2,7 @@ package com.alwold.classwatch.service;
 
 import com.alwold.classwatch.dao.CourseDao;
 import com.alwold.classwatch.dao.NotificationDao;
+import com.alwold.classwatch.dao.UserDao;
 import com.alwold.classwatch.model.Course;
 import com.alwold.classwatch.model.NotificationStatus;
 import com.alwold.classwatch.model.School;
@@ -28,6 +29,7 @@ public class WorkerThread extends Thread {
 	private CourseDao courseDao;
 	private List<Notifier> notifiers;
 	private NotificationDao notificationDao;
+	private UserDao userDao;
 
 	@Override
 	public void run() {
@@ -47,11 +49,15 @@ public class WorkerThread extends Thread {
 								for (User user: courseDao.getActiveWatchers(course)) {
 									logger.trace("notifying "+user.getEmail());
 									for (Notifier notifier: notifiers) {
-										try {
-											notifier.notify(user, course, plugin.getClassInfo(course.getTerm().getPk().getCode(), course.getCourseNumber()));
-											notificationDao.logNotification(course, user, notifier.getType(), NotificationStatus.SUCCESSS, null);
-										} catch (NotificationException e) {
-											notificationDao.logNotification(course, user, notifier.getType(), NotificationStatus.FAILURE, e.getMessage());
+										if (userDao.isNotifierEnabled(user, notifier.getType())) {
+											try {
+												notifier.notify(user, course, plugin.getClassInfo(course.getTerm().getPk().getCode(), course.getCourseNumber()));
+												notificationDao.logNotification(course, user, notifier.getType(), NotificationStatus.SUCCESSS, null);
+											} catch (NotificationException e) {
+												notificationDao.logNotification(course, user, notifier.getType(), NotificationStatus.FAILURE, e.getMessage());
+											}
+										} else {
+											logger.trace("skipping notification type "+notifier.getType()+" because it's not enabled");
 										}
 									}
 									courseDao.setNotified(user, course);
@@ -108,6 +114,10 @@ public class WorkerThread extends Thread {
 
 	public void setNotificationDao(NotificationDao notificationDao) {
 		this.notificationDao = notificationDao;
+	}
+
+	public void setUserDao(UserDao userDao) {
+		this.userDao = userDao;
 	}
 
 }
