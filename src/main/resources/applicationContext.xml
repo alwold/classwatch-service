@@ -12,10 +12,10 @@
 	
 	<bean id="dataSource"
         class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
-		<property name="driverClass" value="org.postgresql.Driver"/>
-		<property name="jdbcUrl" value="jdbc:postgresql://localhost:5432/classwatch"/>
-		<property name="user" value="classwatch"/>
-		<property name="password" value="sp1ffy"/>
+		<property name="driverClass" value="${dataSource.driverClass}"/>
+		<property name="jdbcUrl" value="${dataSource.jdbcUrl}"/>
+		<property name="user" value="${dataSource.user}"/>
+		<property name="password" value="${dataSource.password}"/>
 	</bean>
 	
 	<bean id="courseQueue" class="com.alwold.classwatch.service.CourseQueue"/>
