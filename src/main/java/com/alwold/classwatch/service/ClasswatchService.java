@@ -4,6 +4,9 @@ import com.alwold.classwatch.dao.CourseDao;
 import com.alwold.classwatch.dao.NotificationDao;
 import com.alwold.classwatch.dao.UserDao;
 import com.alwold.classwatch.notification.Notifier;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.Logger;
@@ -32,6 +35,7 @@ public class ClasswatchService {
 	}
 	
 	public void run() {
+		writePidFile();
 		logger.trace("run");
 		for (int i = 0; i < WORKER_THREAD_COUNT; i++) {
 			WorkerThread thread = new WorkerThread();
@@ -44,6 +48,23 @@ public class ClasswatchService {
 			thread.setUserDao(applicationContext.getBean(UserDao.class));
 			logger.trace("start worker");
 			thread.start();
+		}
+	}
+	
+	private void writePidFile() {
+		String pid = System.getProperty("app.pid");
+		if (pid == null) {
+			logger.warn("Unable to get PID, not logging");
+		} else {
+			try {
+				File pidFile = new File("/var/run/classwatch/classwatch-service.pid");
+				FileWriter fw = new FileWriter(pidFile);
+				fw.write(pid);
+				fw.close();
+				pidFile.deleteOnExit();
+			} catch (IOException e) {
+				logger.error("Unable to write PID file", e);
+			}
 		}
 	}
 }
