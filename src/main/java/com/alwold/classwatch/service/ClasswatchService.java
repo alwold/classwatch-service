@@ -25,6 +25,7 @@ public class ClasswatchService {
 	private List<WorkerThread> workerThreads;
 	private ApplicationContext applicationContext;
 	
+	
 	public static void main(String[] args) {
 		new ClasswatchService().run();
 	}
@@ -32,6 +33,11 @@ public class ClasswatchService {
 	public ClasswatchService() {
 		workerThreads = new ArrayList<WorkerThread>();
 		applicationContext = new ClassPathXmlApplicationContext("applicationContext.xml", "classwatchDao.xml");
+		Runtime.getRuntime().addShutdownHook(new Thread(){
+			public void run() {
+				shutdown();
+			}
+		});
 	}
 	
 	public void run() {
@@ -49,8 +55,23 @@ public class ClasswatchService {
 			logger.trace("start worker");
 			thread.start();
 		}
+		for (WorkerThread t: workerThreads) {
+			try {
+				t.join();
+			} catch (InterruptedException ex) {
+				logger.error(ex);
+			}
+		}
+	}
+
+	public void shutdown() {
+		logger.trace("shutdown requested");
+		for (WorkerThread t: workerThreads) {
+			t.shutdown();
+		}
 	}
 	
+
 	private void writePidFile() {
 		String pid = System.getProperty("app.pid");
 		if (pid == null) {

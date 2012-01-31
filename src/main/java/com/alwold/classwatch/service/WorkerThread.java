@@ -30,13 +30,14 @@ public class WorkerThread extends Thread {
 	private List<Notifier> notifiers;
 	private NotificationDao notificationDao;
 	private UserDao userDao;
+	private boolean shutdownRequested = false;
 
 	@Override
 	public void run() {
 		try {
 			logger.trace("waiting for tx");
 			Course course = courseQueue.take();
-			while (course != null) {
+			while (course != null && !shutdownRequested) {
 				try {
 					logger.trace("checking course "+course.getId());
 					SchoolPlugin plugin = getPlugin(course.getTerm().getPk().getSchool());
@@ -77,6 +78,10 @@ public class WorkerThread extends Thread {
 			}
 		} catch (InterruptedException e) {
 		}
+	}
+	
+	public void shutdown() {
+		shutdownRequested = true;
 	}
 	
 	private SchoolPlugin getPlugin(School school) {
