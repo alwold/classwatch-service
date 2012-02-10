@@ -40,9 +40,9 @@ public class WorkerThread extends Thread {
 			while (course != null && !shutdownRequested) {
 				try {
 					logger.trace("checking course "+course.getId());
-					SchoolPlugin plugin = getPlugin(course.getTerm().getPk().getSchool());
+					SchoolPlugin plugin = getPlugin(course.getTerm().getSchool());
 					try {
-						Status status = plugin.getClassStatus(course.getTerm().getPk().getCode(), course.getCourseNumber());
+						Status status = plugin.getClassStatus(course.getTerm().getCode(), course.getCourseNumber());
 						if (status != null) {
 							courseDao.logStatus(course.getId(), status);
 							if (status == Status.OPEN) {
@@ -52,7 +52,7 @@ public class WorkerThread extends Thread {
 									for (Notifier notifier: notifiers) {
 										if (userDao.isNotifierEnabled(user, notifier.getType())) {
 											try {
-												notifier.notify(user, course, plugin.getClassInfo(course.getTerm().getPk().getCode(), course.getCourseNumber()));
+												notifier.notify(user, course, plugin.getClassInfo(course.getTerm().getCode(), course.getCourseNumber()));
 												notificationDao.logNotification(course, user, notifier.getType(), NotificationStatus.SUCCESSS, null);
 											} catch (NotificationException e) {
 												notificationDao.logNotification(course, user, notifier.getType(), NotificationStatus.FAILURE, e.getMessage());
