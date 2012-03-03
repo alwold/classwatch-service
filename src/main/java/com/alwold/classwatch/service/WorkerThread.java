@@ -53,7 +53,7 @@ public class WorkerThread extends Thread {
 										if (userDao.isNotifierEnabled(user, notifier.getType())) {
 											try {
 												notifier.notify(user, course, plugin.getClassInfo(course.getTerm().getCode(), course.getCourseNumber()));
-												notificationDao.logNotification(course, user, notifier.getType(), NotificationStatus.SUCCESSS, null);
+												notificationDao.logNotification(course, user, notifier.getType(), NotificationStatus.SUCCESS, null);
 											} catch (NotificationException e) {
 												notificationDao.logNotification(course, user, notifier.getType(), NotificationStatus.FAILURE, e.getMessage());
 											}
